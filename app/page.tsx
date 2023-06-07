@@ -1,4 +1,13 @@
-const getGames = async () => {
+import Image from "next/image";
+
+type Games = {
+  id: number;
+  background_images: string;
+  rating: number;
+  name: string;
+};
+
+const getGames = async (): Promise<Games[]> => {
   const response = await fetch(
     `https://api.rawg.io/api/games?key=${process.env.RAWG}`
   );
@@ -7,8 +16,9 @@ const getGames = async () => {
     throw new Error("Failed to fetch");
   }
 
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   const data = await response.json();
-  return data;
+  return data.results;
 };
 
 export default async function Home() {
@@ -16,8 +26,25 @@ export default async function Home() {
   console.log(games);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <h1>Hello World</h1>
+    <main className="m-24">
+      {games.map((game) => (
+        <div key={game.id}>
+          <h1>{game.name}</h1>
+          <p>{game.rating}</p>
+          <div className="aspect-video relative">
+            {game?.background_images && (
+              <Image
+                src={`${game.background_images}`}
+                width={32}
+                height={32}
+                fill
+                alt={game.name}
+                className="object-cover"
+              />
+            )}
+          </div>
+        </div>
+      ))}
     </main>
   );
 }
